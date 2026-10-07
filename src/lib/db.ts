@@ -101,7 +101,7 @@ export const actions = {
   },
 
   // orders
-  placeOrder(input: { email: string; address: Order["shippingAddress"]; couponCode?: string; paymentMethod: string }): Order {
+  placeOrder(input: { email: string; address: Order["shippingAddress"]; couponCode?: string | undefined; paymentMethod: string }): Order {
     const t = computeTotals(state, input.couponCode);
     if (!t.lines.length) throw new Error("Your cart is empty");
     for (const l of t.lines) if (l.qty > l.product.stock) throw new Error(`Only ${l.product.stock} × ${l.product.name} in stock`);

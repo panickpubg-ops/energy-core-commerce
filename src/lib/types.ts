@@ -23,16 +23,16 @@ export interface Product {
   tagline: string;
   description: string;
   price: number;
-  compareAt?: number;
+  compareAt?: number | undefined;
   stock: number;
   lowStockThreshold: number;
-  voltage?: number;
-  capacityAh?: number;
-  energyWh?: number;
+  voltage?: number | undefined;
+  capacityAh?: number | undefined;
+  energyWh?: number | undefined;
   chemistry: Chemistry;
-  cycleLife?: number;
-  dimensions?: string;
-  weightKg?: number;
+  cycleLife?: number | undefined;
+  dimensions?: string | undefined;
+  weightKg?: number | undefined;
   warrantyYears: number;
   images: string[];
   specs: ProductSpec[];
@@ -44,7 +44,7 @@ export interface Product {
 export interface Review {
   id: string;
   productId: string;
-  userId?: string;
+  userId?: string | undefined;
   author: string;
   rating: number;
   title: string;
@@ -59,7 +59,7 @@ export interface User {
   password: string; // demo-mode only; real auth handled by Supabase
   name: string;
   role: "customer" | "admin";
-  phone?: string;
+  phone?: string | undefined;
   createdAt: string;
 }
 
@@ -87,7 +87,7 @@ export interface OrderItem {
 export interface Order {
   id: string;
   number: string;
-  userId?: string;
+  userId?: string | undefined;
   email: string;
   items: OrderItem[];
   subtotal: number;
@@ -95,13 +95,13 @@ export interface Order {
   shipping: number;
   tax: number;
   total: number;
-  couponCode?: string;
+  couponCode?: string | undefined;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   paymentMethod: string;
   shippingAddress: Address;
-  trackingNumber?: string;
-  carrier?: string;
+  trackingNumber?: string | undefined;
+  carrier?: string | undefined;
   timeline: { status: OrderStatus; at: string; note?: string }[];
   createdAt: string;
 }
@@ -113,9 +113,9 @@ export interface Coupon {
   value: number;
   minSubtotal: number;
   active: boolean;
-  usageLimit?: number;
+  usageLimit?: number | undefined;
   used: number;
-  expiresAt?: string;
+  expiresAt?: string | undefined;
 }
 
 export interface HomeContent {

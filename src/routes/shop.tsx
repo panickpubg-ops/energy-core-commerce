@@ -7,7 +7,8 @@ import { ProductCard } from "@/components/site/ProductCard";
 type Search = { q?: string | undefined; category?: string | undefined; chem?: string | undefined; volt?: string | undefined; sort?: string | undefined; stock?: boolean | undefined };
 
 export const Route = createFileRoute("/shop")({
-  validateSearch: (s: Record<string, unknown>): Search => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  validateSearch: (s: any): Search => ({
     q: typeof s.q === "string" ? s.q : undefined,
     category: typeof s.category === "string" ? s.category : undefined,
     chem: typeof s.chem === "string" ? s.chem : undefined,

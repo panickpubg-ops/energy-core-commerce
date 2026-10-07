@@ -14,8 +14,8 @@ function Checkout() {
   const s = useDb((x) => x);
   const user = useSession();
   const navigate = useNavigate();
-  const [code, setCode] = useState("");
-  const [applied, setApplied] = useState<string | undefined>();
+  const [code, setCode] = useState<string>("");
+  const [applied, setApplied] = useState<string | undefined>(undefined);
   const [pay, setPay] = useState("card");
   const [busy, setBusy] = useState(false);
   const t = computeTotals(s, applied);

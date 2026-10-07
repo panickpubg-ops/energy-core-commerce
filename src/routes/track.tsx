@@ -5,7 +5,8 @@ import { Field, PageTitle } from "@/components/site/Field";
 import { OrderTimeline } from "@/components/site/OrderStatus";
 type S = { number?: string | undefined; email?: string | undefined; placed?: boolean | undefined };
 export const Route = createFileRoute("/track")({
-  validateSearch: (s: Record<string, unknown>): S => ({ number: s.number as string | undefined, email: s.email as string | undefined, placed: s.placed ? true : undefined }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  validateSearch: (s: any): S => ({ number: s.number as string | undefined, email: s.email as string | undefined, placed: s.placed ? true : undefined }),
   head: () => ({ meta: [{ title: "Track your order — Voltarc" }, { name: "description", content: "Track a Voltarc order." }, { property: "og:title", content: "Track order — Voltarc" }, { property: "og:description", content: "Order tracking." }] }),
   component: T,
 });
