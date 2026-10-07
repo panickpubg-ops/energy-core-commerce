@@ -111,7 +111,7 @@ export const actions = {
       number: `VA-${10434 + state.orders.length}`,
       userId: state.sessionUserId ?? undefined,
       email: input.email,
-      items: t.lines.map((l) => ({ productId: l.productId, name: l.product.name, sku: l.product.sku, price: l.product.price, qty: l.qty, image: l.product.images[0] })),
+      items: t.lines.map((l) => ({ productId: l.productId, name: l.product.name, sku: l.product.sku, price: l.product.price, qty: l.qty, image: l.product.images[0] ?? "" })),
       subtotal: t.subtotal, discount: t.discount, shipping: t.shipping, tax: t.tax, total: t.total,
       couponCode: t.coupon?.code, status: "paid", paymentStatus: "paid", paymentMethod: input.paymentMethod,
       shippingAddress: input.address,

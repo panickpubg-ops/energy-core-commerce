@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { useDb } from "@/lib/db";
 import { ProductCard } from "@/components/site/ProductCard";
 
-type Search = { q?: string; category?: string; chem?: string; volt?: string; sort?: string; stock?: boolean };
+type Search = { q?: string | undefined; category?: string | undefined; chem?: string | undefined; volt?: string | undefined; sort?: string | undefined; stock?: boolean | undefined };
 
 export const Route = createFileRoute("/shop")({
   validateSearch: (s: Record<string, unknown>): Search => ({
