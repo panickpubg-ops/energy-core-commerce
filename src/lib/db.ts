@@ -4,7 +4,7 @@
  * through the `actions` object below — swap each action's body for a Supabase
  * call (see supabase/schema.sql) once the project is connected.
  */
-import { useSyncExternalStore } from "react";
+import { useRef, useSyncExternalStore } from "react";
 import { seedState } from "./seed";
 import type { DbState, Order, OrderStatus, Product, User } from "./types";
 
@@ -41,12 +41,22 @@ export function hydrateDb() {
   }
 }
 
+const subscribe = (l: () => void) => (listeners.add(l), () => void listeners.delete(l));
+
+// Selectors often return new arrays (filter/map); cache the result per state
+// object so useSyncExternalStore sees a stable snapshot and doesn't loop.
 export function useDb<T>(sel: (s: DbState) => T): T {
-  return useSyncExternalStore(
-    (l) => (listeners.add(l), () => listeners.delete(l)),
-    () => sel(state),
-    () => sel(SEED),
-  );
+  const cache = useRef<{ s: DbState; v: T } | null>(null);
+  const serverCache = useRef<{ v: T } | null>(null);
+  const get = () => {
+    if (!cache.current || cache.current.s !== state) cache.current = { s: state, v: sel(state) };
+    return cache.current.v;
+  };
+  const getServer = () => {
+    if (!serverCache.current) serverCache.current = { v: sel(SEED) };
+    return serverCache.current.v;
+  };
+  return useSyncExternalStore(subscribe, get, getServer);
 }
 export const getDb = () => state;
 
