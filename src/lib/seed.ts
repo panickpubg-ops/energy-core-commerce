@@ -43,8 +43,8 @@ export const seedState = (): DbState => ({
     { id: "r4", productId: "p8", author: "Lee K.", rating: 5, title: "Finally a proper lithium profile", body: "Stops cleanly at 14.6 V. Great charger.", approved: false, createdAt: d(1) },
   ],
   users: [
-    { id: "u-admin", email: "admin@voltarc.dev", password: "admin123", name: "Store Admin", role: "admin", createdAt: d(200) },
-    { id: "u-demo", email: "demo@voltarc.dev", password: "demo123", name: "Alex Rivera", role: "customer", createdAt: d(40) },
+    { id: "u-admin", email: "admin@voltarc.dev", name: "Store Admin", role: "admin", createdAt: d(200) },
+    { id: "u-demo", email: "demo@voltarc.dev", name: "Alex Rivera", role: "customer", createdAt: d(40) },
   ],
   orders: [
     {
@@ -92,4 +92,7 @@ export const seedState = (): DbState => ({
   cart: [],
   wishlist: [],
   sessionUserId: null,
+  me: null,
+  loaded: true,
+  backendError: null,
 });
