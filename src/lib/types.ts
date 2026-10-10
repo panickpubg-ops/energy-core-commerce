@@ -56,7 +56,6 @@ export interface Review {
 export interface User {
   id: string;
   email: string;
-  password: string; // demo-mode only; real auth handled by Supabase
   name: string;
   role: "customer" | "admin";
   phone?: string | undefined;
@@ -153,4 +152,7 @@ export interface DbState {
   cart: CartLine[];
   wishlist: string[];
   sessionUserId: string | null;
+  me: User | null;
+  loaded: boolean;
+  backendError: string | null;
 }

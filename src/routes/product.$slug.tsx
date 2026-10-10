@@ -2,23 +2,21 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Check, Heart, Minus, Plus, ShieldCheck, Truck } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { actions, fmtDate, getDb, money, useDb, useSession } from "@/lib/db";
-import { seedState } from "@/lib/seed";
+import { actions, fmtDate, money, useDb, useSession } from "@/lib/db";
 import { ProductCard, Stars } from "@/components/site/ProductCard";
 
 export const Route = createFileRoute("/product/$slug")({
-  loader: ({ params }) => {
-    const p = (typeof window === "undefined" ? seedState() : getDb()).products.find((x) => x.slug === params.slug);
-    return { name: p?.name ?? "Product", tagline: p?.tagline ?? "", description: p?.description ?? "" };
+  head: ({ params }) => {
+    const name = params.slug.split("-").map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    return {
+      meta: [
+        { title: `${name} — Voltarc Energy` },
+        { name: "description", content: `${name}: specifications, pricing and reviews at Voltarc Energy.` },
+        { property: "og:title", content: `${name} — Voltarc` },
+        { property: "og:description", content: `Shop ${name} at Voltarc Energy.` },
+      ],
+    };
   },
-  head: ({ loaderData }) => ({
-    meta: [
-      { title: `${loaderData?.name ?? "Product"} — Voltarc Energy` },
-      { name: "description", content: loaderData?.description.slice(0, 155) ?? "" },
-      { property: "og:title", content: `${loaderData?.name} — Voltarc` },
-      { property: "og:description", content: loaderData?.tagline ?? "" },
-    ],
-  }),
   component: ProductPage,
   notFoundComponent: () => <div className="p-20 text-center">Product not found.</div>,
 });
@@ -36,9 +34,10 @@ function ProductPage() {
   const [tab, setTab] = useState<"specs" | "reviews">("specs");
   const [rev, setRev] = useState({ rating: 5, title: "", body: "" });
 
+  const loaded = useDb((s) => s.loaded);
   if (!product) {
-    if (typeof window !== "undefined") throw notFound();
-    return null;
+    if (loaded) throw notFound();
+    return <div className="mx-auto max-w-7xl px-4 py-24 text-center text-muted-foreground">Loading product…</div>;
   }
   const avg = reviews.length ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : 0;
   const specs = [
@@ -105,7 +104,7 @@ function ProductPage() {
             >
               Add to cart
             </button>
-            <button onClick={() => actions.toggleWishlist(product.id)} className="grid w-12 place-items-center rounded-full border bg-card" aria-label="Wishlist">
+            <button onClick={() => actions.toggleWishlist(product.id).catch((e: Error) => toast.error(e.message))} className="grid w-12 place-items-center rounded-full border bg-card" aria-label="Wishlist">
               <Heart className={`h-5 w-5 ${wished ? "fill-foreground" : ""}`} />
             </button>
           </div>
@@ -148,9 +147,9 @@ function ProductPage() {
               onSubmit={(e) => {
                 e.preventDefault();
                 if (!user) return;
-                actions.addReview({ ...rev, productId: product.id, author: user.name, userId: user.id });
-                setRev({ rating: 5, title: "", body: "" });
-                toast.success("Thanks! Your review will appear after moderation.");
+                actions.addReview({ ...rev, productId: product.id, author: user.name, userId: user.id })
+                  .then(() => { setRev({ rating: 5, title: "", body: "" }); toast.success("Thanks! Your review will appear after moderation."); })
+                  .catch((err: Error) => toast.error(err.message));
               }}
             >
               <h3 className="font-semibold">Write a review</h3>

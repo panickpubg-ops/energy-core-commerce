@@ -13,17 +13,26 @@ export const Route = createFileRoute("/auth")({
 function Auth() {
   const [mode, setMode] = useState<"in" | "up">("in");
   const navigate = useNavigate();
-  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+  const [busy, setBusy] = useState(false);
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
+    setBusy(true);
     try {
       const u = mode === "in"
-        ? actions.signIn(String(f.get("email")), String(f.get("password")))
-        : actions.signUp(String(f.get("name")), String(f.get("email")), String(f.get("password")));
+        ? await actions.signIn(String(f.get("email")), String(f.get("password")))
+        : await actions.signUp(String(f.get("name")), String(f.get("email")), String(f.get("password")));
+      if (!u) {
+        toast.success("Check your email to confirm your account, then sign in.");
+        setMode("in");
+        return;
+      }
       toast.success(`Welcome, ${u.name.split(" ")[0]}`);
       navigate({ to: u.role === "admin" ? "/admin" : "/account" });
     } catch (err) {
       toast.error((err as Error).message);
+    } finally {
+      setBusy(false);
     }
   };
   return (
@@ -39,14 +48,11 @@ function Auth() {
           {mode === "up" && <Field label="Full name" name="name" required />}
           <Field label="Email" name="email" type="email" required />
           <Field label="Password" name="password" type="password" required minLength={6} />
-          <button className="w-full rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground">{mode === "in" ? "Sign in" : "Create account"}</button>
+          <button disabled={busy} className="w-full disabled:opacity-50 rounded-full bg-primary py-3 text-sm font-semibold text-primary-foreground">{mode === "in" ? "Sign in" : "Create account"}</button>
         </form>
         <button onClick={() => setMode(mode === "in" ? "up" : "in")} className="mt-6 text-sm text-muted-foreground">
           {mode === "in" ? "New here? Create an account" : "Already have an account? Sign in"}
         </button>
-        <div className="mt-10 rounded-2xl border border-dashed p-4 font-mono text-xs text-muted-foreground">
-          Demo accounts<br />customer: demo@voltarc.dev / demo123<br />admin: admin@voltarc.dev / admin123
-        </div>
       </div>
     </div>
   );

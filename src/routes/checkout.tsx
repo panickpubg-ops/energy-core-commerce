@@ -23,16 +23,15 @@ function Checkout() {
   if (!t.lines.length)
     return <div className="py-24 text-center"><p>Your cart is empty.</p><Link to="/shop" className="mt-4 inline-block underline">Shop</Link></div>;
 
-  const submit = (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const g = (k: string) => String(f.get(k) ?? "");
     setBusy(true);
     try {
-      const order = actions.placeOrder({
+      const order = await actions.placeOrder({
         email: g("email"),
         couponCode: applied,
-        paymentMethod: pay === "card" ? `Card •••• ${g("card").slice(-4) || "4242"}` : "PayPal",
         address: { name: g("name"), line1: g("line1"), city: g("city"), region: g("region"), postal: g("postal"), country: g("country") },
       });
       toast.success(`Order ${order.number} confirmed`);
@@ -93,7 +92,7 @@ function Checkout() {
           </ul>
           <div className="mt-6 flex gap-2">
             <input value={code} onChange={(e) => setCode(e.target.value)} placeholder="Discount code" className="flex-1 rounded-xl border bg-background px-3 py-2 text-sm uppercase" />
-            <button type="button" onClick={() => { const r = computeTotals(s, code); if (r.coupon) { setApplied(code); toast.success("Code applied"); } else toast.error("Code invalid or minimum not met"); }} className="rounded-xl border px-4 text-sm font-medium">Apply</button>
+            <button type="button" onClick={async () => { try { const c = await actions.validateCoupon(code.trim(), t.subtotal); if (c) { setApplied(c.code); toast.success("Code applied"); } else toast.error("Code invalid or minimum not met"); } catch (err) { toast.error((err as Error).message); } }} className="rounded-xl border px-4 text-sm font-medium">Apply</button>
           </div>
           <dl className="mt-6 space-y-2 text-sm">
             <div className="flex justify-between"><dt className="text-muted-foreground">Subtotal</dt><dd>{money(t.subtotal)}</dd></div>
