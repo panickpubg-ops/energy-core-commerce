@@ -30,7 +30,7 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       </Link>
       <button
-        onClick={() => actions.toggleWishlist(product.id)}
+        onClick={() => actions.toggleWishlist(product.id).catch((e: Error) => toast.error(e.message))}
         className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-card/90 backdrop-blur transition hover:scale-105"
         aria-label="Toggle wishlist"
       >
