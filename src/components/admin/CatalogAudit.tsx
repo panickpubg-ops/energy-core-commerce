@@ -18,7 +18,7 @@ export function CatalogAudit() {
 
   const go = async () => {
     const s = getDb();
-    if (!includeCatalog && !adminData.trim()) return toast.error("Add some data or include the current catalog.");
+    if (!includeCatalog && !adminData.trim()) { toast.error("Add some data or include the current catalog."); return; }
     setBusy(true);
     setResult(null);
     try {
