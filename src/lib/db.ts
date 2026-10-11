@@ -163,7 +163,8 @@ export function hydrateDb() {
 // ---------------------------------------------------------------- helpers
 export const newId = () => crypto.randomUUID();
 export const slugify = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
-const must = <T,>(r: { error: { message: string } | null; data?: T }) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const must = <T,>(r: { error: { message: string } | null; data?: any }) => {
   if (r.error) throw new Error(r.error.message);
   return r.data as T;
 };

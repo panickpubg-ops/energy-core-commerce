@@ -13,7 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { hydrateDb } from "@/lib/db";
+import { hydrateDb, useDb } from "@/lib/db";
 import { SiteHeader } from "@/components/site/SiteHeader";
 import { SiteFooter } from "@/components/site/SiteFooter";
 import { Toaster } from "@/components/ui/sonner";
@@ -92,10 +92,12 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const isAdmin = useRouterState({ select: (s) => s.location.pathname.startsWith("/admin") });
+  const backendError = useDb((s) => s.backendError);
   useEffect(() => hydrateDb(), []);
 
   return (
     <QueryClientProvider client={queryClient}>
+      {backendError && <div className="bg-destructive px-4 py-2 text-center text-sm text-destructive-foreground">{backendError}</div>}
       {isAdmin ? (
         <Outlet />
       ) : (
