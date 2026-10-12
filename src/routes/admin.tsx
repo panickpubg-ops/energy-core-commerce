@@ -50,13 +50,13 @@ function Admin() {
           {!s.orders.length && <tr><td className="p-3 text-muted-foreground">No orders yet.</td></tr>}
         </tbody></table></div></section>
 
-        <section><h2 className="mb-3 font-semibold">Products & inventory</h2><div className="overflow-x-auto rounded-2xl border bg-card"><table className="w-full text-sm"><tbody>
+        <section><div className="mb-3 flex items-center justify-between"><h2 className="font-semibold">Products & inventory</h2><Link to="/admin/products/$id" params={{ id: "new" }} className="rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground">+ New product</Link></div><div className="overflow-x-auto rounded-2xl border bg-card"><table className="w-full text-sm"><tbody>
           {s.products.map((p) => (
-            <tr key={p.id} className="border-b"><td className="p-3">{p.name}</td><td className="p-3 font-mono">{p.sku}</td>
+            <tr key={p.id} className="border-b"><td className="p-3"><Link to="/admin/products/$id" params={{ id: p.id }} className="font-medium hover:underline">{p.name}</Link></td><td className="p-3 font-mono">{p.sku}</td>
               <td className="p-3"><input type="number" defaultValue={p.price} onBlur={(e) => +e.target.value !== p.price && safe(actions.saveProduct({ ...p, price: +e.target.value }))} className="w-24 rounded border px-2 py-1" /></td>
               <td className="p-3"><input type="number" defaultValue={p.stock} onBlur={(e) => +e.target.value !== p.stock && safe(actions.saveProduct({ ...p, stock: +e.target.value }))} className="w-20 rounded border px-2 py-1" /></td>
               <td className="p-3"><label className="flex gap-1"><input type="checkbox" checked={p.published} onChange={(e) => safe(actions.saveProduct({ ...p, published: e.target.checked }))} />Published</label></td>
-              <td className="p-3"><button onClick={() => confirm(`Delete ${p.name}?`) && safe(actions.deleteProduct(p.id))} className="text-destructive">Delete</button></td></tr>
+              <td className="p-3"><Link to="/admin/products/$id" params={{ id: p.id }} className="mr-3 underline">Edit</Link><button onClick={() => confirm(`Delete ${p.name}?`) && safe(actions.deleteProduct(p.id))} className="text-destructive">Delete</button></td></tr>
           ))}
         </tbody></table></div></section>
 
