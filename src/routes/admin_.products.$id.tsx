@@ -20,7 +20,7 @@ const blank = (): Product => ({
 const optNum = (v: string) => (v.trim() === "" ? undefined : Number(v));
 const input = "w-full rounded-xl border bg-background px-3 py-2 text-sm outline-none focus:border-foreground/40";
 
-function F({ label, error, hint, children, span }: { label: string; error?: string | undefined; hint?: string; children: ReactNode; span?: boolean }) {
+function F({ label, error, hint, children, span }: { label: string; error?: string | undefined; hint?: string | undefined; children: ReactNode; span?: boolean }) {
   return (
     <label className={`block text-sm ${span ? "sm:col-span-2" : ""}`}>
       <span className="mb-1 block font-medium">{label}</span>
