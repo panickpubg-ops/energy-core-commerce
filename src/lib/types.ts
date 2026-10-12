@@ -149,6 +149,10 @@ export interface DbState {
   coupons: Coupon[];
   home: HomeContent;
   settings: StoreSettings;
+  config: SiteConfig;
+  blogPosts: BlogPost[];
+  roles: Record<string, AppRole[]>;
+  movements: InventoryMovement[];
   cart: CartLine[];
   wishlist: string[];
   sessionUserId: string | null;
@@ -156,3 +160,38 @@ export interface DbState {
   loaded: boolean;
   backendError: string | null;
 }
+
+export interface BlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  coverUrl: string;
+  tags: string[];
+  author: string;
+  seoTitle: string;
+  seoDescription: string;
+  published: boolean;
+  publishedAt?: string | undefined;
+  createdAt: string;
+}
+
+export type PaymentMethodKey = "card" | "bank_transfer" | "cod" | "invoice";
+
+export interface SiteConfig {
+  brand: { logoUrl: string; tagline: string; address: string; hours: string };
+  payments: { testMode: boolean; methods: Record<PaymentMethodKey, boolean>; bankInstructions: string; invoiceTerms: string };
+  seo: { titleSuffix: string; defaultDescription: string; ogImage: string; ga4Id: string; gtmId: string; metaPixelId: string; allowIndexing: boolean };
+}
+
+export interface InventoryMovement {
+  id: string;
+  productId: string;
+  delta: number;
+  reason: "restock" | "sale" | "adjustment" | "return" | "cancellation";
+  note?: string | undefined;
+  createdAt: string;
+}
+
+export type AppRole = "admin" | "staff" | "customer";
