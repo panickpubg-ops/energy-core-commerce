@@ -1,3 +1,4 @@
+import { DEFAULT_CONFIG } from "./site-config";
 import hero from "@/assets/hero.jpg";
 import station from "@/assets/p-station.jpg";
 import lifepo4 from "@/assets/p-lifepo4.jpg";
@@ -89,6 +90,10 @@ export const seedState = (): DbState => ({
     storeName: "Voltarc Energy", supportEmail: "support@voltarc.dev", supportPhone: "+1 (800) 555-0199",
     currency: "USD", taxRate: 8, freeShippingThreshold: 250, flatShipping: 15,
   },
+  config: DEFAULT_CONFIG,
+  blogPosts: [],
+  roles: {},
+  movements: [],
   cart: [],
   wishlist: [],
   sessionUserId: null,
