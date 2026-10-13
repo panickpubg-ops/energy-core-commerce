@@ -7,13 +7,14 @@
 import { useRef, useSyncExternalStore } from "react";
 import { supabase } from "./supabase";
 import { seedState } from "./seed";
-import type { Coupon, DbState, Order, OrderStatus, Product, Review, User } from "./types";
+import type { AppRole, BlogPost, Category, Coupon, DbState, HomeContent, InventoryMovement, Order, OrderStatus, PaymentMethodKey, PaymentStatus, Product, Review, SiteConfig, StoreSettings, User } from "./types";
+import { configFromRows, configToRows } from "./site-config";
 
 const CART_KEY = "voltarc-cart-v2";
 const DEFAULTS = seedState();
 const EMPTY: DbState = {
   ...DEFAULTS,
-  categories: [], products: [], reviews: [], users: [], orders: [], coupons: [],
+  categories: [], products: [], reviews: [], users: [], orders: [], coupons: [], blogPosts: [], roles: {}, movements: [],
   cart: [], wishlist: [], sessionUserId: null, me: null, loaded: false, backendError: null,
 };
 let state: DbState = EMPTY;
@@ -81,6 +82,9 @@ function mapOrder(r: any): Order {
 const mapReview = (r: any): Review => ({ id: r.id, productId: r.product_id, userId: r.user_id ?? undefined, author: r.author, rating: r.rating, title: r.title, body: r.body, approved: r.approved, createdAt: r.created_at });
 const mapCoupon = (r: any): Coupon => ({ id: r.id, code: r.code, type: r.type, value: Number(r.value), minSubtotal: Number(r.min_subtotal), active: r.active, usageLimit: r.usage_limit ?? undefined, used: r.used, expiresAt: r.expires_at ?? undefined });
 
+const mapPost = (r: any): BlogPost => ({ id: r.id, slug: r.slug, title: r.title, excerpt: r.excerpt ?? "", content: r.content ?? "", coverUrl: r.cover_url ?? "", tags: r.tags ?? [], author: r.author ?? "", seoTitle: r.seo_title ?? "", seoDescription: r.seo_description ?? "", published: !!r.published, publishedAt: r.published_at ?? undefined, createdAt: r.created_at });
+const postRow = (p: BlogPost) => ({ id: p.id, slug: p.slug, title: p.title, excerpt: p.excerpt, content: p.content, cover_url: p.coverUrl || null, tags: p.tags, author: p.author, seo_title: p.seoTitle || null, seo_description: p.seoDescription || null, published: p.published, published_at: p.published ? (p.publishedAt ?? new Date().toISOString()) : null });
+
 // ---------------------------------------------------------------- loading
 function fail(where: string, error: { message: string } | null) {
   if (!error) return false;
@@ -97,18 +101,26 @@ async function loadCatalog() {
     supabase.from("store_settings").select("*"),
   ]);
   if (fail("Categories", cats.error) || fail("Products", prods.error) || fail("Reviews", revs.error)) return;
+  void loadBlog();
   const store = settings.data?.find((r: any) => r.key === "store")?.value;
   const home = settings.data?.find((r: any) => r.key === "home")?.value;
   set((s) => ({
     loaded: true, backendError: null,
     categories: (cats.data ?? []).map((c: any) => ({ id: c.id, slug: c.slug, name: c.name, description: c.description ?? "", image: c.image_url ?? "", sort: c.sort })),
     products: (prods.data ?? []).map(mapProduct),
+    config: configFromRows(settings.data ?? [], s.config),
     reviews: (revs.data ?? []).map(mapReview),
     settings: store ? { storeName: store.store_name, supportEmail: store.support_email, supportPhone: store.support_phone, currency: store.currency, taxRate: Number(store.tax_rate), freeShippingThreshold: Number(store.free_shipping_threshold), flatShipping: Number(store.flat_shipping) } : s.settings,
     home: home ? { heroEyebrow: home.hero_eyebrow, heroTitle: home.hero_title, heroSubtitle: home.hero_subtitle, heroCta: home.hero_cta, announcement: home.announcement } : s.home,
   }));
   // Fill category images from their first product when none is set.
   set((s) => ({ categories: s.categories.map((c) => (c.image ? c : { ...c, image: s.products.find((p) => p.categoryId === c.id)?.images[0] ?? "" })) }));
+}
+
+async function loadBlog() {
+  // Table is added by supabase/admin-upgrade.sql; stay quiet until it exists.
+  const { data, error } = await supabase.from("blog_posts").select("*").order("published_at", { ascending: false, nullsFirst: true });
+  if (!error) set(() => ({ blogPosts: (data ?? []).map(mapPost) }));
 }
 
 async function loadUser(userId: string | null) {
@@ -136,10 +148,22 @@ async function loadWishlist() {
   set(() => ({ wishlist: (data ?? []).map((w: any) => w.product_id) }));
 }
 async function loadAdminData() {
-  const [coupons, profiles] = await Promise.all([supabase.from("coupons").select("*"), supabase.from("profiles").select("*")]);
+  const [coupons, profiles, roles, moves] = await Promise.all([
+    supabase.from("coupons").select("*").order("created_at", { ascending: false }),
+    supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+    supabase.from("user_roles").select("user_id, role"),
+    supabase.from("inventory_movements").select("*").order("created_at", { ascending: false }).limit(300),
+  ]);
+  const roleMap: Record<string, AppRole[]> = {};
+  for (const r of roles.data ?? []) (roleMap[r.user_id] ??= []).push(r.role);
   set(() => ({
     coupons: (coupons.data ?? []).map(mapCoupon),
-    users: (profiles.data ?? []).map((p: any) => ({ id: p.id, email: p.email ?? "", name: p.full_name ?? "", role: "customer" as const, createdAt: p.created_at })),
+    roles: roleMap,
+    movements: (moves.data ?? []).map((m: any): InventoryMovement => ({ id: m.id, productId: m.product_id, delta: m.delta, reason: m.reason, note: m.note ?? undefined, createdAt: m.created_at })),
+    users: (profiles.data ?? []).map((p: any) => {
+      const r = roleMap[p.id] ?? [];
+      return { id: p.id, email: p.email ?? "", name: p.full_name ?? "", phone: p.phone ?? undefined, role: r.includes("admin") || r.includes("staff") ? ("admin" as const) : ("customer" as const), createdAt: p.created_at };
+    }),
   }));
 }
 
@@ -236,10 +260,13 @@ export const actions = {
     set((s) => ({ coupons: [...s.coupons.filter((x) => x.code !== c.code), coupon] }));
     return coupon;
   },
-  async placeOrder(input: { email: string; address: Order["shippingAddress"]; couponCode?: string | undefined }) {
+  async placeOrder(input: { email: string; address: Order["shippingAddress"]; couponCode?: string | undefined; paymentMethod?: PaymentMethodKey | undefined }) {
     const items = state.cart.map((l) => ({ product_id: l.productId, qty: l.qty }));
     if (!items.length) throw new Error("Your cart is empty");
-    const row = must<any>(await supabase.rpc("place_order", { _email: input.email, _items: items, _address: input.address, _coupon: input.couponCode ?? null }));
+    const base = { _email: input.email, _items: items, _address: input.address, _coupon: input.couponCode ?? null };
+    let r = await supabase.rpc("place_order_v2", { ...base, _payment_method: input.paymentMethod ?? null });
+    if (r.error && /place_order_v2|schema cache|does not exist/i.test(r.error.message)) r = await supabase.rpc("place_order", base);
+    const row = must<any>(r);
     set(() => ({ cart: [] }));
     void loadCatalog();
     if (state.sessionUserId) void loadOrders();
@@ -261,6 +288,69 @@ export const actions = {
       ...(extra?.trackingNumber !== undefined ? { tracking_number: extra.trackingNumber } : {}),
     }).eq("id", id));
     await loadOrders();
+  },
+
+  async setPaymentStatus(id: string, paymentStatus: PaymentStatus) {
+    must(await supabase.from("orders").update({ payment_status: paymentStatus }).eq("id", id));
+    await loadOrders();
+  },
+
+  // admin: settings
+  async saveStoreSettings(st: StoreSettings, home: HomeContent) {
+    must(await supabase.from("store_settings").upsert([
+      { key: "store", value: { store_name: st.storeName, support_email: st.supportEmail, support_phone: st.supportPhone, currency: st.currency, tax_rate: st.taxRate, free_shipping_threshold: st.freeShippingThreshold, flat_shipping: st.flatShipping } },
+      { key: "home", value: { hero_eyebrow: home.heroEyebrow, hero_title: home.heroTitle, hero_subtitle: home.heroSubtitle, hero_cta: home.heroCta, announcement: home.announcement } },
+    ]));
+    await loadCatalog();
+  },
+  async saveConfig(c: SiteConfig) {
+    const rows = configToRows(c);
+    must(await supabase.from("store_settings").upsert(Object.entries(rows).map(([key, value]) => ({ key, value }))));
+    await loadCatalog();
+  },
+
+  // admin: categories
+  async saveCategory(c: Category) {
+    must(await supabase.from("categories").upsert({ id: c.id, slug: c.slug, name: c.name, description: c.description, image_url: c.image || null, sort: c.sort }));
+    await loadCatalog();
+  },
+  async deleteCategory(id: string) {
+    must(await supabase.from("categories").delete().eq("id", id));
+    await loadCatalog();
+  },
+
+  // admin: coupons
+  async saveCoupon(c: Coupon) {
+    must(await supabase.from("coupons").upsert({ id: c.id, code: c.code.toUpperCase(), type: c.type, value: c.value, min_subtotal: c.minSubtotal, usage_limit: c.usageLimit ?? null, active: c.active, expires_at: c.expiresAt || null }));
+    await loadAdminData();
+  },
+  async deleteCoupon(id: string) {
+    must(await supabase.from("coupons").delete().eq("id", id));
+    await loadAdminData();
+  },
+
+  // admin: customers & roles (admin-only via RLS)
+  async setUserRole(userId: string, role: AppRole, on: boolean) {
+    if (!on && userId === state.sessionUserId && role === "admin") throw new Error("You can't remove your own admin access");
+    must(on ? await supabase.from("user_roles").upsert({ user_id: userId, role }, { onConflict: "user_id,role" }) : await supabase.from("user_roles").delete().eq("user_id", userId).eq("role", role));
+    await loadAdminData();
+  },
+
+  // admin: inventory
+  async adjustStock(productId: string, delta: number, reason: InventoryMovement["reason"], note?: string) {
+    if (!delta) return;
+    must(await supabase.from("inventory_movements").insert({ product_id: productId, delta, reason, note: note || null, created_by: state.sessionUserId }));
+    await Promise.all([loadCatalog(), loadAdminData()]);
+  },
+
+  // admin: blog
+  async savePost(p: BlogPost) {
+    must(await supabase.from("blog_posts").upsert(postRow(p)));
+    await loadBlog();
+  },
+  async deletePost(id: string) {
+    must(await supabase.from("blog_posts").delete().eq("id", id));
+    await loadBlog();
   },
 
   // admin: catalog & inventory
