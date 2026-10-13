@@ -1,5 +1,7 @@
 import type { Category, Order, Product } from "./types";
 
+const ymd = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
 /** Orders that count as real revenue (paid and not refunded/cancelled). */
 export const isRevenue = (o: Order) => o.paymentStatus === "paid" && o.status !== "refunded" && o.status !== "cancelled";
 
@@ -15,13 +17,11 @@ export function salesSummary(orders: Order[], days: number, now = new Date()) {
   for (let i = 0; i < days; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
-    series.push({ date: d.toISOString().slice(0, 10), revenue: 0, orders: 0 });
+    series.push({ date: ymd(d), revenue: 0, orders: 0 });
   }
   const byDate = new Map(series.map((s) => [s.date, s]));
   for (const o of inRange) {
-    const d = new Date(o.createdAt);
-    const key = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString().slice(0, 10);
-    const row = byDate.get(key) ?? byDate.get(o.createdAt.slice(0, 10));
+    const row = byDate.get(ymd(new Date(o.createdAt)));
     if (!row) continue;
     row.orders += 1;
     if (isRevenue(o)) row.revenue = Math.round((row.revenue + o.total) * 100) / 100;
