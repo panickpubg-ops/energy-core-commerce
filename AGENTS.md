@@ -14,3 +14,7 @@
 - Checkout must go through the place_order SQL function so prices, stock and coupons are enforced server-side.
 - All store data flows through src/lib/db.ts (useDb + actions) which reads/writes Supabase; only the cart is kept in localStorage — keeps components backend-agnostic.
 - AI calls live in *.server.ts modules behind createServerFn wrappers that verify the caller's Supabase token and staff role before calling the AI Gateway — keeps the key and prompts server-side and admin-only.
+- Admin is a layout route (src/routes/admin.tsx, sidebar + Outlet) with one child route per section; shared admin UI lives in src/components/admin/kit.tsx — keeps sections independent and consistent.
+- Brand, payments and SEO settings are rows in the publicly readable store_settings table, so never store secrets there; schema additions go in supabase/admin-upgrade.sql (also appended to schema.sql) for existing installs.
+- Checkout calls place_order_v2 (wraps place_order and records the payment method), falling back to place_order if the upgrade SQL isn't installed.
+- Blog content is Markdown rendered by src/lib/markdown.ts, which escapes all HTML first — never render post content with another unescaped renderer.
