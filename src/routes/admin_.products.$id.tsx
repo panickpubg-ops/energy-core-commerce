@@ -58,7 +58,7 @@ function Editor() {
 
   if (!loaded || (!isNew && !p && !existing && !loaded)) return <div className="grid min-h-screen place-items-center text-muted-foreground">Loading…</div>;
   if (user?.role !== "admin") return <div className="grid min-h-screen place-items-center"><Link to="/auth" className="underline">Sign in as an admin</Link></div>;
-  if (!p) return <div className="grid min-h-screen place-items-center"><div className="text-center"><p>Product not found.</p><Link to="/admin" className="underline">Back to admin</Link></div></div>;
+  if (!p) return <div className="grid min-h-screen place-items-center"><div className="text-center"><p>Product not found.</p><Link to="/admin/products" className="underline">Back to products</Link></div></div>;
 
   const up = (patch: Partial<Product>) => setP((cur) => (cur ? { ...cur, ...patch } : cur));
   const suggestedWh = energyFrom(p.voltage, p.capacityAh);
@@ -109,7 +109,7 @@ function Editor() {
   };
   const remove = async () => {
     if (!confirm(`Delete ${p.name || "this product"}? This can't be undone.`)) return;
-    try { await actions.deleteProduct(p.id); toast.success("Product deleted"); navigate({ to: "/admin" }); }
+    try { await actions.deleteProduct(p.id); toast.success("Product deleted"); navigate({ to: "/admin/products" }); }
     catch (e) { toast.error((e as Error).message); }
   };
 
@@ -117,7 +117,7 @@ function Editor() {
     <div className="min-h-screen pb-24">
       <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center gap-3 px-6 py-3">
-          <Link to="/admin" className="rounded-full p-2 hover:bg-muted" aria-label="Back"><ArrowLeft className="h-5 w-5" /></Link>
+          <Link to="/admin/products" className="rounded-full p-2 hover:bg-muted" aria-label="Back"><ArrowLeft className="h-5 w-5" /></Link>
           <div className="min-w-0 flex-1">
             <p className="truncate font-semibold">{p.name || "New product"}</p>
             <p className="text-xs text-muted-foreground">{p.published ? "Published" : "Draft"}{p.sku && ` · ${p.sku}`}</p>

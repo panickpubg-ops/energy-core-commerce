@@ -4,12 +4,15 @@ import { useState } from "react";
 import { useDb, useSession } from "@/lib/db";
 
 export function Logo({ dark }: { dark?: boolean }) {
+  const logoUrl = useDb((s) => s.config.brand.logoUrl);
+  const name = useDb((s) => s.settings.storeName.split(" ")[0] || "Voltarc");
+  if (logoUrl) return <Link to="/" className="flex items-center"><img src={logoUrl} alt={name} className="h-8 w-auto max-w-40 object-contain" /></Link>;
   return (
     <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight">
       <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-accent-foreground">
         <Zap className="h-4 w-4" fill="currentColor" />
       </span>
-      <span className={dark ? "text-ink-foreground" : ""}>Voltarc</span>
+      <span className={dark ? "text-ink-foreground" : ""}>{name}</span>
     </Link>
   );
 }
@@ -19,6 +22,7 @@ const nav = [
   { to: "/shop", label: "LiFePO4", search: { category: "lifepo4" } },
   { to: "/shop", label: "Power Stations", search: { category: "power-stations" } },
   { to: "/shop", label: "BMS & Chargers", search: { category: "bms" } },
+  { to: "/blog", label: "Journal" },
   { to: "/about", label: "Why Voltarc" },
 ] as const;
 

@@ -4,6 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { actions, computeTotals, money, useDb, useSession } from "@/lib/db";
 import { Field } from "@/components/site/Field";
+import { PAYMENT_METHODS } from "@/lib/site-config";
+import type { PaymentMethodKey } from "@/lib/types";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [{ title: "Secure checkout — Voltarc" }, { name: "description", content: "Complete your Voltarc order." }, { property: "og:title", content: "Checkout — Voltarc" }, { property: "og:description", content: "Secure checkout." }] }),
@@ -16,7 +18,9 @@ function Checkout() {
   const navigate = useNavigate();
   const [code, setCode] = useState<string>("");
   const [applied, setApplied] = useState<string | undefined>(undefined);
-  const [pay, setPay] = useState("card");
+  const methods = PAYMENT_METHODS.filter((m) => s.config.payments.methods[m.key]);
+  const [picked, setPicked] = useState<PaymentMethodKey | null>(null);
+  const pay = picked && methods.some((m) => m.key === picked) ? picked : methods[0]?.key ?? "card";
   const [busy, setBusy] = useState(false);
   const t = computeTotals(s, applied);
 
@@ -32,6 +36,7 @@ function Checkout() {
       const order = await actions.placeOrder({
         email: g("email"),
         couponCode: applied,
+        paymentMethod: pay,
         address: { name: g("name"), line1: g("line1"), city: g("city"), region: g("region"), postal: g("postal"), country: g("country") },
       });
       toast.success(`Order ${order.number} confirmed`);
@@ -65,19 +70,16 @@ function Checkout() {
           </section>
           <section>
             <h2 className="mb-4 font-semibold">Payment</h2>
-            <div className="grid grid-cols-2 gap-3">
-              {[["card", "Credit card"], ["paypal", "PayPal"]].map(([v, l]) => (
-                <button type="button" key={v} onClick={() => setPay(v ?? "card")} className={`rounded-xl border p-4 text-left text-sm ${pay === v ? "border-primary ring-2 ring-primary/10" : "bg-card"}`}>{l}</button>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {methods.map((m) => (
+                <button type="button" key={m.key} onClick={() => setPicked(m.key)} className={`rounded-xl border p-4 text-left text-sm ${pay === m.key ? "border-primary ring-2 ring-primary/10" : "bg-card"}`}>{m.label}</button>
               ))}
             </div>
-            {pay === "card" && (
-              <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <div className="sm:col-span-3"><Field label="Card number" name="card" placeholder="4242 4242 4242 4242" inputMode="numeric" /></div>
-                <Field label="Expiry" placeholder="MM / YY" />
-                <Field label="CVC" placeholder="123" />
-              </div>
-            )}
-            <p className="mt-3 text-xs text-muted-foreground">Test mode — no real charge is made. A payment provider will be connected before launch.</p>
+            {pay === "card" && <p className="mt-3 text-sm text-muted-foreground">Card details are collected securely once online payments are switched on. Your order is reserved now.</p>}
+            {pay === "bank_transfer" && <p className="mt-3 whitespace-pre-line rounded-xl border bg-card p-4 text-sm">{s.config.payments.bankInstructions || "Bank details will be emailed with your order confirmation."}</p>}
+            {pay === "cod" && <p className="mt-3 text-sm text-muted-foreground">Pay the courier when your order arrives.</p>}
+            {pay === "invoice" && <p className="mt-3 text-sm text-muted-foreground">{s.config.payments.invoiceTerms}</p>}
+            {s.config.payments.testMode && <p className="mt-3 text-xs text-muted-foreground">Test mode — no real charge is made.</p>}
           </section>
         </div>
         <aside className="h-fit rounded-3xl border bg-card p-6 lg:sticky lg:top-32">
