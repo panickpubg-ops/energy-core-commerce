@@ -36,6 +36,7 @@ export function SiteFooter() {
           <h4 className="mb-4 text-sm font-medium">Company</h4>
           <ul className="space-y-2 text-sm text-ink-foreground/60">
             <li><Link to="/about" className="hover:text-accent">About</Link></li>
+            <li><Link to="/blog" className="hover:text-accent">Journal</Link></li>
             <li><Link to="/account" className="hover:text-accent">My account</Link></li>
             <li><Link to="/admin" className="hover:text-accent">Admin</Link></li>
           </ul>

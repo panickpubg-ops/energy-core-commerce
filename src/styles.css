@@ -125,3 +125,16 @@
   background-image: linear-gradient(to right, color-mix(in oklab, var(--ink-foreground) 6%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in oklab, var(--ink-foreground) 6%, transparent) 1px, transparent 1px);
   background-size: 48px 48px;
 }
+
+.prose-blog { line-height: 1.75; font-size: 1.0625rem; }
+.prose-blog h2 { margin: 2.2em 0 0.6em; font-size: 1.6rem; font-weight: 600; line-height: 1.25; }
+.prose-blog h3, .prose-blog h4 { margin: 1.8em 0 0.5em; font-size: 1.25rem; font-weight: 600; }
+.prose-blog p { margin: 1em 0; }
+.prose-blog ul, .prose-blog ol { margin: 1em 0; padding-left: 1.4em; }
+.prose-blog ul { list-style: disc; }
+.prose-blog ol { list-style: decimal; }
+.prose-blog li { margin: 0.35em 0; }
+.prose-blog a { text-decoration: underline; text-underline-offset: 3px; }
+.prose-blog blockquote { margin: 1.5em 0; border-left: 3px solid var(--accent); padding-left: 1em; color: var(--muted-foreground); }
+.prose-blog code { border-radius: 6px; background: var(--muted); padding: 0.1em 0.35em; font-size: 0.9em; }
+.prose-blog img { margin: 1.5em 0; border-radius: 1rem; }
