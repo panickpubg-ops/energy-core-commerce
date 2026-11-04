@@ -22,7 +22,8 @@ const nav = [
   { to: "/shop", label: "LiFePO4", search: { category: "lifepo4" } },
   { to: "/shop", label: "Power Stations", search: { category: "power-stations" } },
   { to: "/shop", label: "BMS & Chargers", search: { category: "bms" } },
-  { to: "/blog", label: "Journal" },
+  { to: "/calculator", label: "Sizing tool" },
+  { to: "/compare", label: "Compare" },
   { to: "/about", label: "Why Voltarc" },
 ] as const;
 

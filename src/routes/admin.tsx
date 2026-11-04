@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { BarChart3, FileText, Folder, Gauge, Package, Receipt, Search, Settings, ShieldCheck, Sparkles, Star, Tag, Users, Warehouse, Menu, X, ExternalLink } from "lucide-react";
+import { Building2, BarChart3, FileText, Folder, Gauge, Package, Receipt, Search, Settings, ShieldCheck, Sparkles, Star, Tag, Users, Warehouse, Menu, X, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { useDb, useSession } from "@/lib/db";
 import { Logo } from "@/components/site/SiteHeader";
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin")({
 const groups = [
   { label: "Overview", items: [{ to: "/admin", label: "Dashboard", icon: Gauge, exact: true }, { to: "/admin/analytics", label: "Analytics", icon: BarChart3 }] },
   { label: "Catalog", items: [{ to: "/admin/products", label: "Products", icon: Package }, { to: "/admin/categories", label: "Categories", icon: Folder }, { to: "/admin/inventory", label: "Inventory", icon: Warehouse }, { to: "/admin/audit", label: "AI listing audit", icon: Sparkles }] },
-  { label: "Sales", items: [{ to: "/admin/orders", label: "Orders", icon: Receipt }, { to: "/admin/customers", label: "Customers", icon: Users }, { to: "/admin/coupons", label: "Coupons", icon: Tag }] },
+  { label: "Sales", items: [{ to: "/admin/orders", label: "Orders", icon: Receipt }, { to: "/admin/customers", label: "Customers", icon: Users }, { to: "/admin/coupons", label: "Coupons", icon: Tag }, { to: "/admin/leads", label: "Trade & leads", icon: Building2 }] },
   { label: "Content", items: [{ to: "/admin/blog", label: "Blog", icon: FileText }, { to: "/admin/reviews", label: "Reviews", icon: Star }] },
   { label: "Settings", items: [{ to: "/admin/settings", label: "Store & brand", icon: Settings }, { to: "/admin/payments", label: "Payments", icon: ShieldCheck }, { to: "/admin/seo", label: "SEO & tracking", icon: Search }] },
 ] as const;

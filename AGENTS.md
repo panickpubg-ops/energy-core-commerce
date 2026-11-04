@@ -18,3 +18,5 @@
 - Brand, payments and SEO settings are rows in the publicly readable store_settings table, so never store secrets there; schema additions go in supabase/admin-upgrade.sql (also appended to schema.sql) for existing installs.
 - Checkout calls place_order_v2 (wraps place_order and records the payment method), falling back to place_order if the upgrade SQL isn't installed.
 - Blog content is Markdown rendered by src/lib/markdown.ts, which escapes all HTML first — never render post content with another unescaped renderer.
+- Growth features (wholesale requests, email leads, BUNDLE10/WELCOME50 codes) live in supabase/growth-upgrade.sql (also appended to schema.sql); bundle/lead discounts are real coupons so place_order still enforces pricing server-side.
+- Battery sizing math lives in pure src/lib/sizing.ts with tests — keep the calculator page free of formulas.
