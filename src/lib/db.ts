@@ -210,6 +210,25 @@ export function computeTotals(s: DbState, couponCode?: string) {
 export const actions = {
   reload: loadCatalog,
 
+  // growth features (tables from supabase/growth-upgrade.sql)
+  async submitTradeRequest(r: { company: string; contactName: string; email: string; phone: string; businessType: string; volume: string; message: string }) {
+    const res = await supabase.from("trade_requests").insert({ company: r.company, contact_name: r.contactName, email: r.email, phone: r.phone, business_type: r.businessType, volume: r.volume, message: r.message });
+    if (res.error) throw new Error(res.error.message.includes("trade_requests") ? "Trade requests aren't set up yet — please email us instead." : res.error.message);
+  },
+  async subscribeLead(email: string, source: string) {
+    const res = await supabase.from("leads").insert({ email: email.trim().toLowerCase(), source });
+    if (res.error && res.error.code !== "23505") throw new Error(res.error.message.includes("leads") ? "Sign-up isn't available yet — please try again later." : res.error.message);
+  },
+  async listTradeRequests() {
+    return must<any[]>(await supabase.from("trade_requests").select("*").order("created_at", { ascending: false }));
+  },
+  async setTradeStatus(id: string, status: string) {
+    must(await supabase.from("trade_requests").update({ status }).eq("id", id));
+  },
+  async listLeads() {
+    return must<any[]>(await supabase.from("leads").select("*").order("created_at", { ascending: false }));
+  },
+
   // cart (local)
   addToCart(productId: string, qty = 1) {
     set((s) => {
