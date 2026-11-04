@@ -37,6 +37,10 @@ export function SiteFooter() {
           <ul className="space-y-2 text-sm text-ink-foreground/60">
             <li><Link to="/about" className="hover:text-accent">About</Link></li>
             <li><Link to="/blog" className="hover:text-accent">Journal</Link></li>
+            <li><Link to="/calculator" className="hover:text-accent">Sizing calculator</Link></li>
+            <li><Link to="/compare" className="hover:text-accent">Compare batteries</Link></li>
+            <li><Link to="/sizing-guide" className="hover:text-accent">Sizing handbook</Link></li>
+            <li><Link to="/wholesale" className="hover:text-accent">Wholesale & trade</Link></li>
             <li><Link to="/account" className="hover:text-accent">My account</Link></li>
             <li><Link to="/admin" className="hover:text-accent">Admin</Link></li>
           </ul>
