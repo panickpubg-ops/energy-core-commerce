@@ -4,6 +4,8 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { actions, fmtDate, money, useDb, useSession } from "@/lib/db";
 import { ProductCard, Stars } from "@/components/site/ProductCard";
+import { BundleBuilder } from "@/components/site/BundleBuilder";
+import { Downloads } from "@/components/site/Downloads";
 
 export const Route = createFileRoute("/product/$slug")({
   head: ({ params }) => {
@@ -31,7 +33,7 @@ function ProductPage() {
   const user = useSession();
   const [img, setImg] = useState(0);
   const [qty, setQty] = useState(1);
-  const [tab, setTab] = useState<"specs" | "reviews">("specs");
+  const [tab, setTab] = useState<"specs" | "downloads" | "reviews">("specs");
   const [rev, setRev] = useState({ rating: 5, title: "", body: "" });
 
   const loaded = useDb((s) => s.loaded);
@@ -115,15 +117,17 @@ function ProductPage() {
         </div>
       </div>
 
+      <p className="mt-6 text-sm"><Link to="/compare" search={{ ids: product.id }} className="underline">Compare with other batteries</Link> · <Link to="/calculator" className="underline">Not sure it's the right size?</Link></p>
+      <BundleBuilder product={product} />
       <div className="mt-20">
         <div className="flex gap-6 border-b">
-          {(["specs", "reviews"] as const).map((t) => (
+          {(["specs", "downloads", "reviews"] as const).map((t) => (
             <button key={t} onClick={() => setTab(t)} className={`-mb-px border-b-2 pb-3 text-sm font-medium capitalize ${tab === t ? "border-primary" : "border-transparent text-muted-foreground"}`}>
-              {t === "specs" ? "Technical specifications" : `Reviews (${reviews.length})`}
+              {t === "specs" ? "Technical specifications" : t === "downloads" ? "Downloads & resources" : `Reviews (${reviews.length})`}
             </button>
           ))}
         </div>
-        {tab === "specs" ? (
+        {tab === "downloads" ? <Downloads product={product} /> : tab === "specs" ? (
           <dl className="mt-6 grid gap-x-12 md:grid-cols-2">
             {specs.map(([k, v]) => (
               <div key={k} className="flex justify-between border-b py-3 text-sm"><dt className="text-muted-foreground">{k}</dt><dd className="font-mono">{v}</dd></div>
