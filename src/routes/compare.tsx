@@ -5,10 +5,10 @@ import { PageTitle } from "@/components/site/Field";
 import { actions, money, useDb } from "@/lib/db";
 import type { Product } from "@/lib/types";
 
-type Search = { ids?: string };
+type Search = { ids?: string | undefined };
 
 export const Route = createFileRoute("/compare")({
-  validateSearch: (s: Record<string, unknown>): Search => ({ ids: typeof s.ids === "string" ? s.ids : undefined }),
+  validateSearch: (s: Record<string, unknown>): Search => ({ ids: typeof s["ids"] === "string" ? s["ids"] : undefined }),
   head: () => ({
     meta: [
       { title: "Compare batteries — Voltarc" },

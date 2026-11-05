@@ -25,7 +25,7 @@ export function LeadMagnet() {
   const close = () => { localStorage.setItem(KEY, "1"); setOpen(false); };
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(email)) return toast.error("Enter a valid email");
+    if (!/^\S+@\S+\.\S+$/.test(email)) { toast.error("Enter a valid email"); return; }
     setBusy(true);
     try { await actions.subscribeLead(email, "handbook"); setDone(true); localStorage.setItem(KEY, "1"); }
     catch (err) { toast.error((err as Error).message); } finally { setBusy(false); }

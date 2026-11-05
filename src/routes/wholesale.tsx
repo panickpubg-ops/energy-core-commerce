@@ -30,7 +30,7 @@ function Wholesale() {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!/^\S+@\S+\.\S+$/.test(f.email)) return toast.error("Enter a valid email");
+    if (!/^\S+@\S+\.\S+$/.test(f.email)) { toast.error("Enter a valid email"); return; }
     setBusy(true);
     try { await actions.submitTradeRequest(f); setDone(true); } catch (err) { toast.error((err as Error).message); } finally { setBusy(false); }
   };
