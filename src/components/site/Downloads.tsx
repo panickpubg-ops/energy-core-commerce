@@ -6,7 +6,7 @@ const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&
 
 function datasheet(p: Product) {
   const wh = p.energyWh ?? (p.voltage && p.capacityAh ? p.voltage * p.capacityAh : undefined);
-  const rows: [string, string | undefined][] = [
+  const rows: [string, string | number | undefined][] = [
     ["SKU", p.sku], ["Chemistry", p.chemistry], ["Nominal voltage", p.voltage && `${p.voltage} V`], ["Capacity", p.capacityAh && `${p.capacityAh} Ah`],
     ["Energy", wh && `${wh} Wh`], ["Cycle life", p.cycleLife && `${p.cycleLife}`], ["Dimensions", p.dimensions], ["Weight", p.weightKg && `${p.weightKg} kg`],
     ["Warranty", `${p.warrantyYears} years`], ...p.specs.filter((s) => !/^https?:/.test(s.value)).map((s) => [s.label, s.value] as [string, string]),
