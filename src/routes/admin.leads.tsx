@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AdminPage, Panel, safe } from "@/components/admin/kit";
 import { actions, fmtDate } from "@/lib/db";
+import { csvDocument } from "@/lib/csv";
 
 export const Route = createFileRoute("/admin/leads")({
   head: () => ({ meta: [{ title: "Trade & leads — Voltarc admin" }, { name: "robots", content: "noindex" }] }),
@@ -20,7 +21,8 @@ function Leads() {
     actions.listLeads().then(setLeads).catch((e: Error) => setErr(e.message));
   }, []);
   const csv = () => {
-    const blob = new Blob(["email,source,created_at\n" + (leads ?? []).map((l) => `${l.email},${l.source},${l.created_at}`).join("\n")], { type: "text/csv" });
+    const rows = (leads ?? []).map((l) => [l.email, l.source, l.created_at]);
+    const blob = new Blob(["\uFEFF", csvDocument(["email", "source", "created_at"], rows)], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = "leads.csv"; a.click();
   };
 
