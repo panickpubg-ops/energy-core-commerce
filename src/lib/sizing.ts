@@ -60,9 +60,9 @@ export function pickBatteryBank(products: Product[], categories: Category[], vol
 }
 
 /** First published product whose name or category matches any keyword. */
-export function findAccessory(products: Product[], categories: Category[], keywords: string[], categorySlug?: string) {
+export function findAccessory(products: Product[], categories: Category[], keywords: string[], categorySlug?: string, voltage?: number) {
   const catSlug = (id: string) => categories.find((c) => c.id === id)?.slug ?? "";
-  return products.find((p) => p.published && p.stock > 0 && (
+  return products.find((p) => p.published && p.stock > 0 && (!voltage || !p.voltage || p.voltage === voltage) && (
     keywords.some((k) => p.name.toLowerCase().includes(k)) || (categorySlug && catSlug(p.categoryId) === categorySlug)
   )) ?? null;
 }

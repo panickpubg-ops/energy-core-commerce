@@ -32,9 +32,9 @@ function Calculator() {
 
   const r = calculate(loads, voltage, days);
   const bank = useMemo(() => pickBatteryBank(products, categories, voltage, r.requiredAh), [products, categories, voltage, r.requiredAh]);
-  const charger = useMemo(() => findAccessory(products, categories, ["mppt", "solar charge", "charger"], "chargers"), [products, categories]);
-  const inverter = useMemo(() => findAccessory(products, categories, ["inverter"]), [products, categories]);
-  const system = [bank && { p: bank.product, qty: bank.qty }, charger && { p: charger, qty: 1 }, inverter && { p: inverter, qty: 1 }].filter(Boolean) as { p: (typeof products)[number]; qty: number }[];
+  const charger = useMemo(() => findAccessory(products, categories, ["mppt", "solar charge", "charger"], "chargers", voltage), [products, categories, voltage]);
+  const inverter = useMemo(() => findAccessory(products, categories, ["inverter"], undefined, voltage), [products, categories, voltage]);
+  const system = !bank ? [] : [bank && { p: bank.product, qty: bank.qty }, charger && { p: charger, qty: 1 }, inverter && { p: inverter, qty: 1 }].filter(Boolean) as { p: (typeof products)[number]; qty: number }[];
   const systemTotal = system.reduce((s, l) => s + l.p.price * l.qty, 0);
 
   const pickSetup = (id: Setup) => {
