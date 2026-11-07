@@ -403,7 +403,7 @@ create policy "public settings" on public.store_settings for select to anon, aut
 create policy "admin settings" on public.store_settings for all to authenticated using (public.has_role(auth.uid(),'admin')) with check (public.has_role(auth.uid(),'admin'));
 
 insert into public.store_settings (key, value) values
-  ('store', '{"store_name":"Voltarc Energy","support_email":"support@voltarc.dev","support_phone":"+1 (800) 555-0199","currency":"USD","tax_rate":8,"free_shipping_threshold":250,"flat_shipping":15}'),
+  ('store', '{"store_name":"Voltarc Energy","support_email":"support@voltarc.dev","support_phone":"+1 (800) 555-0199","currency":"PKR","tax_rate":0,"free_shipping_threshold":250,"flat_shipping":15}'),
   ('home',  '{"hero_eyebrow":"LiFePO4 · 6,000+ cycles · 10-year warranty","hero_title":"Energy you can engineer around.","hero_subtitle":"Grade-A lithium batteries, power stations and BMS systems.","hero_cta":"Shop batteries","announcement":"Free shipping on orders over $250"}');
 
 -- =====================================================================
@@ -470,9 +470,32 @@ create policy "staff manage posts" on public.blog_posts for all to authenticated
 -- Only non-secret values belong here: this table is publicly readable.
 insert into public.store_settings (key, value) values
   ('brand',    '{"logo_url":"","tagline":"Lithium energy, engineered.","address":"","hours":"Mon–Fri, 9am–6pm"}'),
-  ('payments', '{"test_mode":true,"methods":{"card":true,"bank_transfer":false,"cod":false,"invoice":false},"bank_instructions":"","invoice_terms":"Net 30 for approved business accounts."}'),
+  ('payments', '{"test_mode":true,"methods":{"card":false,"jazzcash":true,"bank_transfer":true,"cod":false,"invoice":false},"bank_instructions":"","jazzcash_instructions":"","whatsapp_number":"+923164529515","invoice_terms":"Net 30 for approved business accounts."}'),
   ('seo',      '{"title_suffix":"Voltarc Energy","default_description":"Premium LiFePO4 batteries, power stations, BMS systems and chargers.","og_image":"","ga4_id":"","gtm_id":"","meta_pixel_id":"","allow_indexing":true}')
 on conflict (key) do nothing;
+
+-- Apply Pakistan currency and local payment defaults to stores created by earlier versions.
+update public.store_settings
+set value = value || '{"currency":"PKR"}'::jsonb
+where key = 'store';
+
+update public.store_settings
+set value = jsonb_set(
+  jsonb_set(
+    jsonb_set(
+      jsonb_set(
+        value,
+        '{methods}',
+        coalesce(value->'methods', '{}'::jsonb) || '{"card":false,"jazzcash":true,"bank_transfer":true}'::jsonb,
+        true
+      ),
+      '{jazzcash_instructions}', coalesce(value->'jazzcash_instructions', '""'::jsonb), true
+    ),
+    '{whatsapp_number}', coalesce(value->'whatsapp_number', '"+923164529515"'::jsonb), true
+  ),
+  '{bank_instructions}', coalesce(value->'bank_instructions', '""'::jsonb), true
+)
+where key = 'payments';
 
 -- staff (not only admins) may need to read; writes stay admin-only via existing policy.
 

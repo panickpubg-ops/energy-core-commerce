@@ -84,7 +84,7 @@ export const seedState = (): DbState => ({
     heroTitle: "Energy you can engineer around.",
     heroSubtitle: "Grade-A lithium batteries, power stations and BMS systems — tested cell by cell and backed by real engineers.",
     heroCta: "Shop batteries",
-    announcement: "Free shipping on orders over $250 · Code CHARGE10 for 10% off",
+    announcement: "Free shipping on orders over Rs. 250 · Code CHARGE10 for 10% off",
   },
   settings: {
     storeName: "Voltarc Energy", supportEmail: "support@voltarc.dev", supportPhone: "+1 (800) 555-0199",
