@@ -110,7 +110,7 @@ async function loadCatalog() {
     products: (prods.data ?? []).map(mapProduct),
     config: configFromRows(settings.data ?? [], s.config),
     reviews: (revs.data ?? []).map(mapReview),
-    settings: store ? { storeName: store.store_name, supportEmail: store.support_email, supportPhone: store.support_phone, currency: store.currency, taxRate: Number(store.tax_rate), freeShippingThreshold: Number(store.free_shipping_threshold), flatShipping: Number(store.flat_shipping) } : s.settings,
+    settings: store ? { storeName: store.store_name, supportEmail: store.support_email, supportPhone: store.support_phone, currency: store.currency || "PKR", taxRate: Number(store.tax_rate), freeShippingThreshold: Number(store.free_shipping_threshold), flatShipping: Number(store.flat_shipping) } : s.settings,
     home: home ? { heroEyebrow: home.hero_eyebrow, heroTitle: home.hero_title, heroSubtitle: home.hero_subtitle, heroCta: home.hero_cta, announcement: home.announcement } : s.home,
   }));
   // Fill category images from their first product when none is set.
@@ -437,5 +437,5 @@ export function useSession() {
   return useDb((s) => s.me);
 }
 
-export const money = (n: number) => new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+export const money = (n: number) => `Rs. ${new Intl.NumberFormat("en-PK", { maximumFractionDigits: 0 }).format(n)}`;
 export const fmtDate = (s: string) => new Date(s).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });

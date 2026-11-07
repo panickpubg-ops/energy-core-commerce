@@ -32,7 +32,13 @@ function Payments() {
           <Panel title="Card provider" description="Online card charges need a payment provider (Stripe or Paddle).">
             <p className="text-sm text-muted-foreground">Card orders are currently recorded as <b>unpaid</b> until a provider is connected. Ask in chat to connect Stripe and orders will be charged and marked paid automatically.</p>
           </Panel>
-          {p.methods.bank_transfer && <Panel title="Bank transfer instructions"><TextArea rows={4} value={p.bankInstructions} placeholder="Bank name, account number, IBAN/SWIFT, reference = order number" onChange={(e) => setP({ ...p, bankInstructions: e.target.value })} /></Panel>}
+          <Panel title="Payment transfer details" description="These details are shown to customers after they choose a payment method. Add only account information you want customers to see.">
+            <div className="space-y-4">
+              <TextInput label="WhatsApp number (international format)" value={p.whatsappNumber} placeholder="+923164529515" onChange={(e) => setP({ ...p, whatsappNumber: e.target.value })} />
+              {p.methods.jazzcash && <TextArea label="JazzCash instructions" rows={3} value={p.jazzcashInstructions} placeholder="JazzCash account name, number, and payment reference instructions" onChange={(e) => setP({ ...p, jazzcashInstructions: e.target.value })} />}
+              {p.methods.bank_transfer && <TextArea label="Bank transfer instructions" rows={4} value={p.bankInstructions} placeholder="Bank name, account title, account number / IBAN, and reference = order number" onChange={(e) => setP({ ...p, bankInstructions: e.target.value })} />}
+            </div>
+          </Panel>
           {p.methods.invoice && <Panel title="Invoice terms"><TextArea rows={2} value={p.invoiceTerms} onChange={(e) => setP({ ...p, invoiceTerms: e.target.value })} /></Panel>}
         </div>
       </div>

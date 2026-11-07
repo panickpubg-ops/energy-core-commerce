@@ -41,9 +41,32 @@ create policy "staff manage posts" on public.blog_posts for all to authenticated
 -- Only non-secret values belong here: this table is publicly readable.
 insert into public.store_settings (key, value) values
   ('brand',    '{"logo_url":"","tagline":"Lithium energy, engineered.","address":"","hours":"Mon–Fri, 9am–6pm"}'),
-  ('payments', '{"test_mode":true,"methods":{"card":true,"bank_transfer":false,"cod":false,"invoice":false},"bank_instructions":"","invoice_terms":"Net 30 for approved business accounts."}'),
+  ('payments', '{"test_mode":true,"methods":{"card":false,"jazzcash":true,"bank_transfer":true,"cod":false,"invoice":false},"bank_instructions":"","jazzcash_instructions":"","whatsapp_number":"+923164529515","invoice_terms":"Net 30 for approved business accounts."}'),
   ('seo',      '{"title_suffix":"Voltarc Energy","default_description":"Premium LiFePO4 batteries, power stations, BMS systems and chargers.","og_image":"","ga4_id":"","gtm_id":"","meta_pixel_id":"","allow_indexing":true}')
 on conflict (key) do nothing;
+
+-- Apply Pakistan currency and local payment defaults to stores created by earlier versions.
+update public.store_settings
+set value = value || '{"currency":"PKR"}'::jsonb
+where key = 'store';
+
+update public.store_settings
+set value = jsonb_set(
+  jsonb_set(
+    jsonb_set(
+      jsonb_set(
+        value,
+        '{methods}',
+        coalesce(value->'methods', '{}'::jsonb) || '{"card":false,"jazzcash":true,"bank_transfer":true}'::jsonb,
+        true
+      ),
+      '{jazzcash_instructions}', coalesce(value->'jazzcash_instructions', '""'::jsonb), true
+    ),
+    '{whatsapp_number}', coalesce(value->'whatsapp_number', '"+923164529515"'::jsonb), true
+  ),
+  '{bank_instructions}', coalesce(value->'bank_instructions', '""'::jsonb), true
+)
+where key = 'payments';
 
 -- staff (not only admins) may need to read; writes stay admin-only via existing policy.
 

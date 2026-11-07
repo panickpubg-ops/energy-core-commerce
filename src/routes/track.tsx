@@ -1,8 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { actions, money } from "@/lib/db";
+import { actions, money, useDb } from "@/lib/db";
 import { Field, PageTitle } from "@/components/site/Field";
 import { OrderTimeline } from "@/components/site/OrderStatus";
+import { Button } from "@/components/ui/button";
+import { MessageCircle } from "lucide-react";
+import { whatsappConfirmationUrl } from "@/lib/payment-links";
 import type { Order } from "@/lib/types";
 
 type S = { number?: string | undefined; email?: string | undefined; placed?: boolean | undefined };
@@ -17,6 +20,7 @@ export const Route = createFileRoute("/track")({
 
 function T() {
   const s = Route.useSearch();
+  const whatsappNumber = useDb((state) => state.config.payments.whatsappNumber);
   const [q, setQ] = useState({ number: s.number ?? "", email: s.email ?? "" });
   const [res, setRes] = useState<Tracked | null | "none">(null);
   const [busy, setBusy] = useState(false);
@@ -47,6 +51,13 @@ function T() {
           <div className="flex justify-between"><b>{res.number}</b><span>{money(res.total)}</span></div>
           <div className="mt-6"><OrderTimeline order={{ status: res.status, timeline: res.timeline } as unknown as Order} /></div>
           {res.trackingNumber && <p className="mt-4 font-mono text-sm">{res.carrier} · {res.trackingNumber}</p>}
+          {whatsappConfirmationUrl(whatsappNumber, `Hello, I would like to confirm payment for order ${res.number} (${money(res.total)}).`) && (
+            <Button asChild className="mt-5">
+              <a href={whatsappConfirmationUrl(whatsappNumber, `Hello, I would like to confirm payment for order ${res.number} (${money(res.total)}).`) ?? undefined} target="_blank" rel="noopener noreferrer">
+                <MessageCircle /> Confirm payment on WhatsApp
+              </a>
+            </Button>
+          )}
         </div>
       )}
     </div>

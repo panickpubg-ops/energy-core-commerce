@@ -1,10 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Lock } from "lucide-react";
+import { Lock, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { actions, computeTotals, money, useDb, useSession } from "@/lib/db";
 import { Field } from "@/components/site/Field";
+import { Button } from "@/components/ui/button";
 import { PAYMENT_METHODS } from "@/lib/site-config";
+import { whatsappConfirmationUrl } from "@/lib/payment-links";
 import type { PaymentMethodKey } from "@/lib/types";
 
 export const Route = createFileRoute("/checkout")({
@@ -76,7 +78,18 @@ function Checkout() {
               ))}
             </div>
             {pay === "card" && <p className="mt-3 text-sm text-muted-foreground">Card details are collected securely once online payments are switched on. Your order is reserved now.</p>}
-            {pay === "bank_transfer" && <p className="mt-3 whitespace-pre-line rounded-xl border bg-card p-4 text-sm">{s.config.payments.bankInstructions || "Bank details will be emailed with your order confirmation."}</p>}
+            {(pay === "bank_transfer" || pay === "jazzcash") && (
+              <div className="mt-3 space-y-3 rounded-lg border bg-card p-4 text-sm">
+                <p className="whitespace-pre-line">{pay === "jazzcash" ? s.config.payments.jazzcashInstructions || "JazzCash payment details will be shared with your order confirmation." : s.config.payments.bankInstructions || "Bank transfer details will be shared with your order confirmation."}</p>
+                {whatsappConfirmationUrl(s.config.payments.whatsappNumber, `Hello, I am checking out with ${pay === "jazzcash" ? "JazzCash" : "bank transfer"}. Please share the payment details.`) && (
+                  <Button asChild variant="outline" size="sm">
+                    <a href={whatsappConfirmationUrl(s.config.payments.whatsappNumber, `Hello, I am checking out with ${pay === "jazzcash" ? "JazzCash" : "bank transfer"}. Please share the payment details.`) ?? undefined} target="_blank" rel="noopener noreferrer">
+                      <MessageCircle /> Ask about payment on WhatsApp
+                    </a>
+                  </Button>
+                )}
+              </div>
+            )}
             {pay === "cod" && <p className="mt-3 text-sm text-muted-foreground">Pay the courier when your order arrives.</p>}
             {pay === "invoice" && <p className="mt-3 text-sm text-muted-foreground">{s.config.payments.invoiceTerms}</p>}
             {s.config.payments.testMode && <p className="mt-3 text-xs text-muted-foreground">Test mode — no real charge is made.</p>}
@@ -103,7 +116,7 @@ function Checkout() {
             <div className="flex justify-between"><dt className="text-muted-foreground">Tax ({s.settings.taxRate}%)</dt><dd>{money(t.tax)}</dd></div>
             <div className="flex justify-between border-t pt-3 text-lg font-semibold"><dt>Total</dt><dd className="tabular-nums">{money(t.total)}</dd></div>
           </dl>
-          <button disabled={busy} className="mt-6 w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-50">Pay {money(t.total)}</button>
+          <button disabled={busy} className="mt-6 w-full rounded-full bg-primary py-3.5 text-sm font-semibold text-primary-foreground disabled:opacity-50">Place order · {money(t.total)}</button>
         </aside>
       </form>
     </div>
