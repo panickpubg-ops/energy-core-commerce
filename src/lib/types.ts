@@ -177,11 +177,11 @@ export interface BlogPost {
   createdAt: string;
 }
 
-export type PaymentMethodKey = "card" | "bank_transfer" | "cod" | "invoice";
+export type PaymentMethodKey = "card" | "jazzcash" | "bank_transfer" | "cod" | "invoice";
 
 export interface SiteConfig {
   brand: { logoUrl: string; tagline: string; address: string; hours: string };
-  payments: { testMode: boolean; methods: Record<PaymentMethodKey, boolean>; bankInstructions: string; invoiceTerms: string };
+  payments: { testMode: boolean; methods: Record<PaymentMethodKey, boolean>; bankInstructions: string; jazzcashInstructions: string; whatsappNumber: string; invoiceTerms: string };
   seo: { titleSuffix: string; defaultDescription: string; ogImage: string; ga4Id: string; gtmId: string; metaPixelId: string; allowIndexing: boolean };
 }
 

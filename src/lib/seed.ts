@@ -88,7 +88,7 @@ export const seedState = (): DbState => ({
   },
   settings: {
     storeName: "Voltarc Energy", supportEmail: "support@voltarc.dev", supportPhone: "+1 (800) 555-0199",
-    currency: "USD", taxRate: 8, freeShippingThreshold: 250, flatShipping: 15,
+    currency: "PKR", taxRate: 0, freeShippingThreshold: 250, flatShipping: 15,
   },
   config: DEFAULT_CONFIG,
   blogPosts: [],
